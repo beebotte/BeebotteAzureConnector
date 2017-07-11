@@ -1,0 +1,230 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "Event Hub Namespace": {
+      "type": "string",
+      "metadata": {
+        "description": "A unique Event Hub Namespace."
+      }
+    },
+    "Azure Webjob Name": {
+      "type": "string",
+      "metadata": {
+        "description": "A unique Web Job Name."
+      }
+    },
+    "Azure Datacenter Location": {
+      "type": "string",
+      "defaultValue": "westus",
+      "metadata": {
+        "description": "All components should be in the same region."
+      }
+    },
+    "Beebotte Channel": {
+      "type": "string",
+      "metadata": {
+        "description": "A channel name that the Beebotte Subscriber should listen on. If you wish for the subscriber to listen on multiple channels, enter a comma separated list of channels, with no spaces."
+      }
+    },
+    "Beebotte API Key": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The Beebotte API Key."
+      }
+    },
+
+    "Beebotte Hostname": {
+      "type": "string",
+      "defaultValue": "http://ws.beebotte.com"
+    },
+    "Beebotte Secret Key": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The Beebotte Secret API Key."
+      }
+    },
+    "Azure Service Plan": {
+      "defaultValue": "USWestBasic",
+      "type": "string"
+    },
+    "Azure Event Hub Name": {
+      "defaultValue": "bbteventhub",
+      "type": "string",
+      "metadata": {
+        "description": "The name you wish to give the Event Hub. The Event Hub name should be unique within a unique Event Hub Namespace."
+      }
+    },
+
+    "Azure SAS Policy Name": {
+      "defaultValue": "bbteventhub",
+      "type": "string",
+      "metadata": {
+        "description": "The name you wish to give the Event Hub SAS Policy. You can accept the default, as the Event Hub SAS Policy name needs only to be unique within a unique Event Hub Namespace."
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "sbVersion": "2015-08-01",
+    "eventHubAuthorizationRuleResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', parameters('Event Hub Namespace'), parameters('Azure Event Hub Name'), parameters('Azure SAS Policy Name'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.EventHub/namespaces",
+      "sku": {
+        "name": "Basic",
+        "tier": "Basic"
+      },
+      "name": "[parameters('Event Hub Namespace')]",
+      "apiVersion": "2015-08-01",
+      "location": "[parameters('Azure Datacenter Location')]",
+      "tags": {},
+      "properties": {},
+      "resources": [
+        {
+          "type": "eventhubs",
+          "name": "[parameters('Azure Event Hub Name')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.EventHub/namespaces', parameters('Event Hub Namespace'))]"
+          ],
+          "apiVersion": "2015-08-01",
+          "location": "[parameters('Azure Datacenter Location')]",
+          "properties": {
+            "messageRetentionInDays": 1,
+            "partitionCount": 2
+          },
+          "resources": [
+            {
+              "type": "authorizationRules",
+              "dependsOn": [
+                "[concat('Microsoft.EventHub/namespaces/', parameters('Event Hub Namespace'),'/eventhubs/',parameters('Azure Event Hub Name'))]"
+              ],
+              "name": "[parameters('Azure SAS Policy Name')]",
+              "apiVersion": "2015-08-01",
+              "location": "[variables('location')]",
+              "properties": {
+                "rights": [
+                  "Send",
+                  "Listen"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "sku": {
+        "name": "B1",
+        "tier": "Basic",
+        "size": "B1",
+        "family": "B",
+        "capacity": 1
+      },
+      "name": "[parameters('Azure Service Plan')]",
+      "apiVersion": "2015-08-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "name": "[parameters('Azure Service Plan')]",
+        "numberOfWorkers": 1
+      },
+      "resources": [],
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "name": "[parameters('Azure Webjob Name')]",
+      "apiVersion": "2015-08-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "name": "[parameters('Azure Webjob Name')]",
+       
+        "hostNames": [
+          "[concat(parameters('Azure Webjob Name'),'.azurewebsites.net')]"
+
+        ],
+        "enabledHostNames": [
+          "[concat(parameters('Azure Webjob Name'),'.azurewebsites.net')]",
+          "[concat(parameters('Azure Webjob Name'),'.scm.azurewebsites.net')]"
+        ],
+        "hostNameSslStates": [
+          {
+            "name": "[concat(parameters('Azure Webjob Name'),'.azurewebsites.net')]",
+            "sslState": 0,
+            "ipBasedSslState": 0
+          },
+          {
+            "name": "[concat(parameters('Azure Webjob Name'),'.scm.azurewebsites.net')]",
+            "sslState": 0,
+            "ipBasedSslState": 0
+          }
+        ],
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('Azure Service Plan'))]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "web",
+          "type": "config",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('Azure Webjob Name'))]"
+          ],
+          "properties": {
+            "alwaysOn": true
+          }
+        },
+        {
+          "apiVersion": "2015-04-01",
+          "name": "web",
+          "type": "sourcecontrols",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('Azure Webjob Name'))]"
+          ],
+          "properties": {
+            "RepoUrl": "https://github.com/beebotte/BeebotteAzureConnector.git",
+            "branch": "master",
+            "IsManualIntegration": true
+          }
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "connectionstrings",
+          "type": "config",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('Azure Webjob Name'))]",
+            "[resourceId('Microsoft.Web/Sites/sourcecontrols', parameters('Azure Webjob Name'), 'web')]"
+          ],
+          "properties": {
+            "bbtChannel": {
+              "value": "[parameters('Beebotte Channel')]",
+              "type": "Custom"
+            },
+            "bbtAPIKey": {
+              "value": "[parameters('Beebotte API Key')]",
+              "type": "Custom"
+            },
+            "bbtHostname": {
+              "value": "[parameters('Beebotte Hostname')]",
+              "type": "Custom"
+            },
+            "bbtSecretKey": {
+              "value": "[parameters('Beebotte Secret Key')]",
+              "type": "Custom"
+            },
+            "eventHubConnectionString": {
+              "value": "[listkeys(variables('eventHubAuthorizationRuleResourceId'), variables('sbVersion')).primaryConnectionstring]",
+              "type": "Custom"
+            }
+          }
+        }
+      ],
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('Azure Service Plan'))]"
+      ]
+    }
+  ]
+}
