@@ -6,9 +6,9 @@ The Beebotte realtime conector for Azure provides a realtime data connection bri
 This solution provides an ARM template to directly deploy the package to Azure
 
 ### What is included in this package: ###
-Markup : * Webjob: A continuous webjob that subscribes to Beebotte channel(s) and publishes data in realtime from Beebotte to Azure Event Hub.
-         * Event Hub with its SAS policy: Event Hub is a data streaming platform capable of receiving and processing millions of events per second.
-         * US West Basic App Service Plan. 
+* Webjob: A continuous webjob that subscribes to Beebotte channel(s) and publishes data in realtime from Beebotte to Azure Event Hub.
+* Event Hub with its SAS policy: Event Hub is a data streaming platform capable of receiving and processing millions of events per second.
+* US West Basic App Service Plan. 
 
 ### How to deploy: ###
 
