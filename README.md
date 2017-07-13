@@ -12,9 +12,9 @@ This solution provides an ARM template to directly deploy the package to Azure
 
 ### How to deploy: ###
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FBeebotte%2FBeebotteAzureConnector%2Fmaster%2F%2Fazuredeploy.json"><img src="https://camo.githubusercontent.com/9285dd3998997a0835869065bb15e5d500475034/687474703a2f2f617a7572656465706c6f792e6e65742f6465706c6f79627574746f6e2e706e67" data-canonical-src="http://azuredeploy.net/deploybutton.png" style="max-width:100%;">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FBeebotte%2FBeebotteAzureConnector%2Fmaster%2F%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png" style="max-width:100%;">
 	</a>
-	<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FBeebotte%2FBeebotteAzureConnector%2Fmaster%2F%2Fazuredeploy.json"><img src="https://camo.githubusercontent.com/536ab4f9bc823c2e0ce72fb610aafda57d8c6c12/687474703a2f2f61726d76697a2e696f2f76697375616c697a65627574746f6e2e706e67" style="max-width:100%;">
+	<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FBeebotte%2FBeebotteAzureConnector%2Fmaster%2F%2Fazuredeploy.json" target="_blank"><img src="http://armviz.io/visualizebutton.png" style="max-width:100%;">
 	</a>
 
 1. Click on the “Deploy to Azure” button above.
