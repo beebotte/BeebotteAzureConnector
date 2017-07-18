@@ -39,3 +39,7 @@ Follow the steps below to deploy the ARM template to your Azure subscription:
 ### Support: ###
 For any issue or concern, contact support@beebotte.com
 
+## License
+Copyright 2017 Beebotte.
+
+[The MIT License](http://opensource.org/licenses/MIT)
